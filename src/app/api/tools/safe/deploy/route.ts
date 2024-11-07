@@ -19,11 +19,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { safeAddress } = await extractAccountId(req);
     const { chainId } = validateInput<Input>(search, parsers);
-    // TODO(bh2smith): check if safe deployed.
     const safeDeployed = await isContract(safeAddress, chainId);
     if (safeDeployed) {
       return NextResponse.json(
-        { transactions: [], meta: { message: "Safe Already Deployed" } },
+        { transaction: null, meta: { message: "Safe Already Deployed" } },
         { status: 200 },
       );
     }

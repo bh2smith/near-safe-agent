@@ -9,6 +9,7 @@ import { extractAccountId, signRequestFor } from "../../util";
 import { Address } from "viem";
 // TODO(bh2smith): explicit export from near-safe
 import { SafeContractSuite } from "near-safe/dist/esm/lib/safe";
+import { eip3770Address, getSafeWalletInfo } from "../util";
 
 interface Input {
   chainId: number;
@@ -27,6 +28,21 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { safeAddress } = await extractAccountId(req);
     const { chainId, recoveryAddress } = validateInput<Input>(search, parsers);
+    const safeInfo = await getSafeWalletInfo(safeAddress, chainId);
+    const ownersView = `https://app.safe.global/settings/setup?safe=${eip3770Address(safeAddress, chainId)}`;
+    if (safeInfo.owners.includes(recoveryAddress)) {
+      return NextResponse.json(
+        {
+          transaction: null,
+          meta: {
+            message: `Recovery address ${recoveryAddress} already an owner of this Safe!`,
+            safeUrl: ownersView,
+          },
+          error: "Recovery address already in Safe",
+        },
+        { status: 200 },
+      );
+    }
     const safePack = new SafeContractSuite();
     const result = signRequestFor({
       chainId,
@@ -38,7 +54,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         },
       ],
     });
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json(
+      { transaction: result, meta: { safeUrl: ownersView } },
+      { status: 200 },
+    );
   } catch (e: unknown) {
     if (
       e instanceof Error &&
