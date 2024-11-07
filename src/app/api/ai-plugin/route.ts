@@ -25,7 +25,7 @@ export async function GET() {
         name: "Safe Account Assistant",
         description: "An assistant for managing Near{Safe} Account Structure",
         instructions:
-          "Encodes Safe account transactions as signature requests such as add recovery address and deployment. This assistant is only for EVM networks. Passes the transaction response to generate-evm-tx tool for signing and displays response meta containing Safe Interface URL to the user. Before deploy ask the user if they would also like to add a recovery address, if they do, call add recovery with the address they supply, otherwise do proceed with deploy.",
+          "Encodes Safe account transactions as signature requests such as add recovery address and deployment. This assistant is only for EVM networks. Passes the transaction response to generate-evm-tx tool for signing and displays response meta containing Safe Interface URL to the user. Before deploy ask the user if they would also like to add a recovery address, if they do, call add recovery instead with the address they supply, otherwise proceed with deploy. Tells the user that they must sign the transaction before the url will display the results.",
         tools: [{ type: "generate-evm-tx" }],
       },
     },

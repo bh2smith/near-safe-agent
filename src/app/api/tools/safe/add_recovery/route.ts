@@ -28,9 +28,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { safeAddress } = await extractAccountId(req);
     const { chainId, recoveryAddress } = validateInput<Input>(search, parsers);
-    const safeInfo = await getSafeWalletInfo(safeAddress, chainId);
+    
     const ownersView = `https://app.safe.global/settings/setup?safe=${eip3770Address(safeAddress, chainId)}`;
-    if (safeInfo.owners.includes(recoveryAddress)) {
+    
+    const safeInfo = await getSafeWalletInfo(safeAddress, chainId);
+    if (safeInfo && safeInfo.owners.includes(recoveryAddress)) {
       return NextResponse.json(
         {
           transaction: null,

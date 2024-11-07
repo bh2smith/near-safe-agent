@@ -1,4 +1,5 @@
 import { networks } from "@safe-global/safe-core-sdk-utils/dist/src/eip-3770/config";
+import { isContract } from "near-safe";
 
 const SAFE_NETWORKS: { [chainId: number]: string } = {
   1: "mainnet",
@@ -20,10 +21,11 @@ const SHORT_NAMES = networks.reduce<{ [key: number]: string }>(
   {},
 );
 
-export function safeTxServiceUrlFor(chainId: number): string {
+export function safeTxServiceUrlFor(chainId: number): string | undefined {
   const network = SAFE_NETWORKS[chainId];
   if (!network) {
-    throw new Error(`Unsupported Safe Transaction Service chainId=${chainId}`);
+    console.warn(`Unsupported Safe Transaction Service chainId=${chainId}`);
+    return undefined;
   }
   return `https://safe-transaction-${network}.safe.global`;
 }
@@ -41,19 +43,28 @@ interface SafeWalletInfo {
 }
 
 export async function getSafeWalletInfo(
-  walletAddress: string,
+  safeAddress: string,
   chainId: number,
-): Promise<SafeWalletInfo> {
-  const baseUrl = safeTxServiceUrlFor(chainId);
-  const response = await fetch(`${baseUrl}/api/v1/safes/${walletAddress}/`, {
-    headers: {
-      accept: "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Safe wallet info: ${response.statusText}`);
+): Promise<SafeWalletInfo | undefined> {
+  const safeDeployed = await isContract(safeAddress as `0x${string}`, chainId);
+  if (!safeDeployed) {
+    return undefined;
   }
+  const baseUrl = safeTxServiceUrlFor(chainId);
+  if (!baseUrl) {
+    // No transaction service for this chain
+    // TODO(bh2smith): Read data from Node.
+    return undefined;
+  }
+  const response = await fetch(`${baseUrl}/api/v1/safes/${safeAddress}/`, {
+    headers: {
+    accept: "application/json",
+  },
+});
+
+if (!response.ok) {
+  throw new Error(`Failed to fetch Safe wallet info: ${response.statusText}`);
+}
 
   return response.json();
 }
