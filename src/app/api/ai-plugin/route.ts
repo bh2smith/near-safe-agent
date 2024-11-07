@@ -5,9 +5,6 @@ const bitteConfig = JSON.parse(process.env.BITTE_CONFIG || "{}");
 if (!key?.accountId) {
   console.error("no account");
 }
-if (!bitteConfig?.url) {
-  console.error("no tunnel url");
-}
 
 export async function GET() {
   const pluginData = {
@@ -19,7 +16,7 @@ export async function GET() {
     },
     servers: [
       {
-        url: bitteConfig.url,
+        url: bitteConfig.url || "https://near-safe-agent.vercel.app/",
       },
     ],
     "x-mb": {
