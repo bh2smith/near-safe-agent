@@ -3,6 +3,7 @@ import { FieldParser, numberField, validateInput } from "../../validate";
 import { extractAccountId, signRequestFor } from "../../util";
 import { zeroAddress } from "viem";
 import { isContract } from "near-safe";
+import { safeUrl } from "../util";
 
 interface Input {
   chainId: number;
@@ -19,11 +20,10 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const { safeAddress } = await extractAccountId(req);
     const { chainId } = validateInput<Input>(search, parsers);
-    // TODO(bh2smith): check if safe deployed.
     const safeDeployed = await isContract(safeAddress, chainId);
     if (safeDeployed) {
       return NextResponse.json(
-        { transactions: [], meta: { message: "Safe Already Deployed" } },
+        { transaction: null, meta: { message: "Safe Already Deployed" } },
         { status: 200 },
       );
     }
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       ],
     });
     return NextResponse.json(
-      { transaction: result, meta: { safeUrl: "TODO" } },
+      { transaction: result, meta: { safeUrl: safeUrl(safeAddress, chainId) } },
       { status: 200 },
     );
   } catch (e: unknown) {

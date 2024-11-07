@@ -12,6 +12,7 @@
     "test": "jest --config jest.config.ts"
   },
   "dependencies": {
+    "@safe-global/safe-core-sdk-utils": "^1.7.4",
     "near-safe": "^0.8.6",
     "next": "15.0.1",
     "react": "19.0.0-rc-69d4b800-20241021",
@@ -32,6 +33,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.0.1",
     "jest": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
     "make-agent": "^0.0.24-rc.2",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
