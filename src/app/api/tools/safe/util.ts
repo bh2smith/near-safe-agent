@@ -1,5 +1,4 @@
 import { networks } from "@safe-global/safe-core-sdk-utils/dist/src/eip-3770/config";
-import { isContract } from "near-safe";
 
 const SAFE_NETWORKS: { [chainId: number]: string } = {
   1: "mainnet",
@@ -46,10 +45,7 @@ export async function getSafeWalletInfo(
   safeAddress: string,
   chainId: number,
 ): Promise<SafeWalletInfo | undefined> {
-  const safeDeployed = await isContract(safeAddress as `0x${string}`, chainId);
-  if (!safeDeployed) {
-    return undefined;
-  }
+  // Assumes the safe is deployed.
   const baseUrl = safeTxServiceUrlFor(chainId);
   if (!baseUrl) {
     // No transaction service for this chain
