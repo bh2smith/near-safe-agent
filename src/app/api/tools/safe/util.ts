@@ -9,16 +9,23 @@ const SAFE_NETWORKS: { [chainId: number]: string } = {
   8453: "base",
   42161: "arbitrum",
   11155111: "sepolia",
-
   // Add more networks as needed
 };
+
+const SHORT_NAMES = networks.reduce<{ [key: number]: string }>(
+  (map, network) => {
+    map[network.chainId] = network.shortName;
+    return map;
+  },
+  {},
+);
 
 export function safeTxServiceUrlFor(chainId: number): string {
   const network = SAFE_NETWORKS[chainId];
   if (!network) {
     throw new Error(`Unsupported Safe Transaction Service chainId=${chainId}`);
   }
-  return `https://safe-transaction-${Snetwork}.safe.global`;
+  return `https://safe-transaction-${network}.safe.global`;
 }
 
 interface SafeWalletInfo {
@@ -52,7 +59,7 @@ export async function getSafeWalletInfo(
 }
 
 export function eip3770Address(address: string, chainId: number): string {
-  return `${networks[chainId]}:${address}`;
+  return `${SHORT_NAMES[chainId]}:${address}`;
 }
 
 export function safeUrl(address: string, chainId: number): string {

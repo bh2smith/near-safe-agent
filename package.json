@@ -33,6 +33,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.0.1",
     "jest": "^29.7.0",
+    "jest-fetch-mock": "^3.0.3",
     "make-agent": "^0.0.24-rc.2",
     "postcss": "^8.4.47",
     "prettier": "^3.3.3",
