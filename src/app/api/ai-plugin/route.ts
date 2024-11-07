@@ -13,8 +13,8 @@ export async function GET() {
   const pluginData = {
     openapi: "3.0.0",
     info: {
-      title: "EVM Agent Boilerplate",
-      description: "API for the boilerplate",
+      title: "Bitte Safe Agent",
+      description: "Agent API for Safe Account Management",
       version: "1.0.0",
     },
     servers: [

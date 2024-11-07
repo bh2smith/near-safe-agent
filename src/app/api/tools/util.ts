@@ -22,8 +22,10 @@ export function signRequestFor({
   };
 }
 
-export async function extractAccountId(req: NextRequest): Promise<{nearAccount: string, safeAddress: Address}> {
-  const metadataHeader = req.headers.get('mb-metadata');
+export async function extractAccountId(
+  req: NextRequest,
+): Promise<{ nearAccount: string; safeAddress: Address }> {
+  const metadataHeader = req.headers.get("mb-metadata");
 
   if (metadataHeader) {
     try {
@@ -37,20 +39,19 @@ export async function extractAccountId(req: NextRequest): Promise<{nearAccount: 
             : "v1.signer",
         },
         pimlicoKey: "", // This is a readonly adapter.
-        safeSaltNonce: "130811896738364156958237239906781888512"
+        safeSaltNonce: "130811896738364156958237239906781888512",
       });
 
       // Use accountId as needed here
       return {
         nearAccount: accountId,
-        safeAddress: adapter.address
+        safeAddress: adapter.address,
       };
     } catch (error) {
-      console.error('Failed to parse mb-metadata:', error);
-      throw new Error('Invalid mb-metadata format');
+      console.error("Failed to parse mb-metadata:", error);
+      throw new Error("Invalid mb-metadata format");
     }
   } else {
-    throw new Error('mb-metadata header not found');
+    throw new Error("mb-metadata header not found");
   }
 }
-

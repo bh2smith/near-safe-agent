@@ -1,9 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import {
-  FieldParser,
-  numberField,
-  validateInput,
-} from "../../validate";
+import { FieldParser, numberField, validateInput } from "../../validate";
 import { extractAccountId, signRequestFor } from "../../util";
 import { zeroAddress } from "viem";
 import { isContract } from "near-safe";
@@ -21,7 +17,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   console.log("safe/deploy/", search);
 
   try {
-    const {safeAddress} = await extractAccountId(req);
+    const { safeAddress } = await extractAccountId(req);
     const { chainId } = validateInput<Input>(search, parsers);
     // TODO(bh2smith): check if safe deployed.
     const safeDeployed = await isContract(safeAddress, chainId);

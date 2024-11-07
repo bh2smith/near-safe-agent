@@ -25,11 +25,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   console.log("safe/deploy/", search);
 
   try {
-    const {safeAddress} = await extractAccountId(req);
-    const { chainId, recoveryAddress } = validateInput<Input>(
-      search,
-      parsers,
-    );
+    const { safeAddress } = await extractAccountId(req);
+    const { chainId, recoveryAddress } = validateInput<Input>(search, parsers);
     const safePack = new SafeContractSuite();
     const result = signRequestFor({
       chainId,
