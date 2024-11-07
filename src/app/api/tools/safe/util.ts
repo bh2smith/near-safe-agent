@@ -58,13 +58,13 @@ export async function getSafeWalletInfo(
   }
   const response = await fetch(`${baseUrl}/api/v1/safes/${safeAddress}/`, {
     headers: {
-    accept: "application/json",
-  },
-});
+      accept: "application/json",
+    },
+  });
 
-if (!response.ok) {
-  throw new Error(`Failed to fetch Safe wallet info: ${response.statusText}`);
-}
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Safe wallet info: ${response.statusText}`);
+  }
 
   return response.json();
 }
