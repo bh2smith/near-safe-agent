@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Near Safe Agent
+
+A Next.js project that provides an AI assistant for managing [Safe](https://safe.global) accounts through a plugin interface.
 
 ## Getting Started
 
-First, run the development server:
+Run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to access the API.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Features
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This agent provides an OpenAPI interface for managing Safe accounts with the following endpoints:
+
+### Safe Deployment
+`GET /api/tools/safe/deploy`
+
+Encodes a null transaction that triggers Safe deployment on a specified chain when executed. Requires:
+- `chainId`: The network where the Safe will be deployed
+
+### Recovery Address Management
+`GET /api/tools/safe/add_recovery`
+
+Adds a recovery address to an existing Safe using the `addOwnerWithThreshold` function. Requires:
+- `chainId`: Network where the Safe exists
+- `from`: The Safe address
+- `recoveryAddress`: Address to add as recovery
+
+### Response Format
+
+All successful transactions return a standard format:
+```typescript
+{
+  transaction: {
+    method: "eth_sendTransaction",
+    chainId: number,
+    params: [{
+      to: string,
+      data: string,
+      value: string
+    }]
+  },
+  meta: {
+    safeUrl: string // URL to view the transaction in Safe UI
+  }
+}
+```
+
+## AI Assistant Integration
+
+The agent includes an AI assistant configured to:
+- Help users deploy new Safe accounts
+- Guide users through adding recovery addresses
+- Generate EVM transactions for Safe operations
+- Provide Safe interface URLs for transaction verification
+
+The assistant will proactively ask users if they want to add a recovery address during deployment flows.
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Safe Documentation](https://docs.safe.global)
+- [Safe App Interface](https://app.safe.global)
