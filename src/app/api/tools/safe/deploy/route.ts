@@ -1,16 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { FieldParser, numberField, validateInput } from "../../validate";
-import { extractAccountId, signRequestFor } from "../../util";
-import { zeroAddress } from "viem";
+import {
+  addressField,
+  FieldParser,
+  numberField,
+  validateInput,
+} from "../../validate";
+import { signRequestFor } from "../../util";
+import { Address, zeroAddress } from "viem";
 import { isContract } from "near-safe";
 import { safeUrl } from "../util";
 
 interface Input {
   chainId: number;
+  safeAddress: Address;
 }
 
 const parsers: FieldParser<Input> = {
   chainId: numberField,
+  safeAddress: addressField,
 };
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
@@ -18,16 +25,23 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   console.log("safe/deploy/", search);
 
   try {
-    const { safeAddress } = await extractAccountId(req);
-    const { chainId } = validateInput<Input>(search, parsers);
+    const { chainId, safeAddress } = validateInput<Input>(search, parsers);
+
     const safeDeployed = await isContract(safeAddress, chainId);
     if (safeDeployed) {
       return NextResponse.json(
-        { transaction: null, meta: { message: "Safe Already Deployed" } },
+        {
+          transaction: null,
+          meta: {
+            message:
+              "Safe Already Deployed. See here: " +
+              safeUrl(safeAddress, chainId),
+          },
+        },
         { status: 200 },
       );
     }
-    const result = signRequestFor({
+    const transaction = signRequestFor({
       chainId,
       metaTransactions: [
         {
@@ -38,7 +52,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       ],
     });
     return NextResponse.json(
-      { transaction: result, meta: { safeUrl: safeUrl(safeAddress, chainId) } },
+      { transaction, meta: { safeUrl: safeUrl(safeAddress, chainId) } },
       { status: 200 },
     );
   } catch (e: unknown) {

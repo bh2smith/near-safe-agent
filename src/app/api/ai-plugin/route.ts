@@ -25,9 +25,10 @@ export async function GET() {
         name: "Safe Account Assistant",
         description: "An assistant for managing Near{Safe} Account Structure",
         instructions:
-          "Encodes Safe account transactions as signature requests such as add recovery address and deployment. This assistant is only for EVM networks. Passes the transaction response to generate-evm-tx tool for signing and displays response meta containing Safe Interface URL to the user. Before deploy ask the user if they would also like to add a recovery address, if they do, call add recovery instead with the address they supply, otherwise proceed with deploy. Tells the user that they must sign the transaction before the url will display the results.",
+          "Encodes Safe account transactions as signature requests such as add recovery address and deployment. This assistant is only for EVM networks. Passes the transaction response to generate-evm-tx tool for signing and displays response meta containing Safe Interface URL to the user. Before deploy ask the user if they would also like to add a recovery address, if they do, call add recovery instead with the address they supply, otherwise proceed with deploy. Tells the user that they must sign the transaction before the url will display the results. Always passes evmAddress as the safeAddress.",
         tools: [{ type: "generate-evm-tx" }],
       },
+      image: "safe.svg",
     },
     paths: {
       "/api/health": {
@@ -65,7 +66,10 @@ export async function GET() {
           description:
             "Encodes null transaction whose on-chain execution will trigger the Safe deployment on provided chainId.",
           operationId: "deploy",
-          parameters: [{ $ref: "#/components/parameters/chainId" }],
+          parameters: [
+            { $ref: "#/components/parameters/chainId" },
+            { $ref: "#/components/parameters/safeAddress" },
+          ],
           responses: {
             "200": { $ref: "#/components/responses/SignRequestResponse200" },
             "400": { $ref: "#/components/responses/BadRequest400" },
@@ -78,12 +82,20 @@ export async function GET() {
           summary:
             "Encodes addOwnerWithThreshold transaction for the provided recoveryAddress",
           description:
-            "Encodes Safe transaction to addOwnerWithThreshold as MetaTransaction",
+            "Encodes Safe transaction to addOwnerWithThreshold with recoveryAddress as the new owner, leaving the wallet signing threshold at 1.",
           operationId: "add-recovery",
           parameters: [
             { $ref: "#/components/parameters/chainId" },
-            { $ref: "#/components/parameters/from" },
-            { $ref: "#/components/parameters/recoveryAddress" },
+            { $ref: "#/components/parameters/safeAddress" },
+            {
+              name: "recoveryAddress",
+              in: "query",
+              required: true,
+              description: "Address to add as recovery",
+              schema: {
+                $ref: "#/components/schemas/Address",
+              },
+            },
           ],
           responses: {
             "200": { $ref: "#/components/responses/SignRequestResponse200" },
@@ -94,27 +106,25 @@ export async function GET() {
     },
     components: {
       parameters: {
-        from: {
-          name: "from",
+        address: {
+          name: "address", // This will be overridden by specific usages
           in: "query",
           description:
             "20 byte Ethereum address encoded as a hex with `0x` prefix.",
           required: true,
           schema: {
-            type: "string",
+            $ref: "#/components/schemas/Address",
           },
           example: "0x6810e776880c02933d47db1b9fc05908e5386b96",
         },
-        recoveryAddress: {
-          name: "recoveryAddress",
+        safeAddress: {
+          name: "safeAddress",
           in: "query",
-          description:
-            "20 byte Ethereum address encoded as a hex with `0x` prefix.",
           required: true,
+          description: "The Safe address (i.e. the connected user address)",
           schema: {
-            type: "string",
+            $ref: "#/components/schemas/Address",
           },
-          example: "0x6810e776880c02933d47db1b9fc05908e5386b96",
         },
         chainId: {
           name: "chainId",
