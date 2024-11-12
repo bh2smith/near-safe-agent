@@ -8,7 +8,6 @@ if (!key?.accountId) {
 
 const url = bitteConfig.url || "https://near-safe-agent.vercel.app";
 
-
 export async function GET() {
   const pluginData = {
     openapi: "3.0.0",
