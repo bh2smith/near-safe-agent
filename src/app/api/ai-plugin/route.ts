@@ -6,6 +6,8 @@ if (!key?.accountId) {
   console.error("no account");
 }
 
+const url = bitteConfig.url || "https://near-safe-agent.vercel.app";
+
 export async function GET() {
   const pluginData = {
     openapi: "3.0.0",
@@ -14,11 +16,7 @@ export async function GET() {
       description: "Agent API for Safe Account Management",
       version: "1.0.0",
     },
-    servers: [
-      {
-        url: bitteConfig.url || "https://near-safe-agent.vercel.app/",
-      },
-    ],
+    servers: [{ url }],
     "x-mb": {
       "account-id": key.accountId,
       assistant: {
@@ -28,7 +26,7 @@ export async function GET() {
           "Encodes Safe account transactions as signature requests such as add recovery address and deployment. This assistant is only for EVM networks. Passes the transaction response to generate-evm-tx tool for signing and displays response meta containing Safe Interface URL to the user. Before deploy ask the user if they would also like to add a recovery address, if they do, call add recovery instead with the address they supply, otherwise proceed with deploy. Tells the user that they must sign the transaction before the url will display the results. Always passes evmAddress as the safeAddress.",
         tools: [{ type: "generate-evm-tx" }],
       },
-      image: "safe.svg",
+      image: `${url}/safe.svg`,
     },
     paths: {
       "/api/health": {
