@@ -5,7 +5,7 @@ import {
   numberField,
   validateInput,
 } from "../../validate";
-import { signRequestFor } from "../../util";
+import { signRequestFor, validateRequest } from "../../util";
 import { Address, zeroAddress } from "viem";
 import { isContract } from "near-safe";
 import { safeUrl } from "../util";
@@ -21,6 +21,9 @@ const parsers: FieldParser<Input> = {
 };
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
+  const headerError = await validateRequest(req);
+  if (headerError) return headerError;
+
   const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
@@ -56,19 +59,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       { status: 200 },
     );
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : String(e);
-    console.error("ERROR MESSAGE", message);
-    if (
-      e instanceof Error &&
-      "body" in e &&
-      e.body instanceof Object &&
-      "errorType" in e.body &&
-      "description" in e.body
-    ) {
-      const errorMessage = `${e.body.errorType}: ${e.body.description}`;
-      return NextResponse.json({ error: errorMessage }, { status: 400 });
-    }
-
+    const message = JSON.stringify(e);
+    console.error(message);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
