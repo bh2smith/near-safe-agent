@@ -13,13 +13,13 @@
   },
   "dependencies": {
     "@safe-global/safe-core-sdk-utils": "^1.7.4",
-    "near-safe": "^0.8.7",
+    "near-safe": "^0.8.8",
     "next": "15.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "swagger-ui-react": "^5.18.2",
-    "vercel-url": "^0.2.1",
-    "viem": "^2.21.44"
+    "vercel-url": "^0.2.4",
+    "viem": "^2.21.45"
   },
   "devDependencies": {
     "@cowprotocol/app-data": "^2.3.0",
