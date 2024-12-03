@@ -1,14 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getSafeSaltNonce, validateRequest } from "../../util";
+import { Address, zeroAddress } from "viem";
+import { isContract } from "near-safe";
+import { safeUrl } from "../util";
 import {
   addressField,
   FieldParser,
   numberField,
+  signRequestFor,
   validateInput,
-} from "../../validate";
-import { signRequestFor, validateRequest } from "../../util";
-import { Address, zeroAddress } from "viem";
-import { isContract } from "near-safe";
-import { safeUrl } from "../util";
+} from "@bitteprotocol/agent-sdk";
 
 interface Input {
   chainId: number;
@@ -21,7 +22,7 @@ const parsers: FieldParser<Input> = {
 };
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const headerError = await validateRequest(req);
+  const headerError = await validateRequest(req, getSafeSaltNonce());
   if (headerError) return headerError;
 
   const search = req.nextUrl.searchParams;

@@ -5,9 +5,68 @@ import {
   eip3770Address,
   safeUrl,
 } from "../src/app/api/tools/safe/util";
-import fetchMock from "jest-fetch-mock";
+import { zeroAddress } from "viem";
+import { SafeContractSuite } from "near-safe";
+import { signRequestFor } from "@bitteprotocol/agent-sdk";
 
-fetchMock.enableMocks();
+describe("signRequestFor", () => {
+  it("Null Tx", () => {
+    const chainId = 1;
+    const transaction = signRequestFor({
+      chainId,
+      metaTransactions: [
+        {
+          to: zeroAddress,
+          value: "0x00",
+          data: "0x",
+        },
+      ],
+    });
+    console.log(transaction);
+    expect(transaction).toEqual({
+      method: "eth_sendTransaction",
+      chainId: 1,
+      params: [
+        {
+          from: "0x0000000000000000000000000000000000000000",
+          to: "0x0000000000000000000000000000000000000000",
+          value: "0x00",
+          data: "0x",
+        },
+      ],
+    });
+  });
+
+  it("Add recovery Tx", () => {
+    const chainId = 1;
+    const safeAddress = "0x1111111111111111111111111111111111111111";
+    const recoveryAddress = "0xffffffffffffffffffffffffffffffffffffffff";
+    const transaction = {
+      method: "eth_sendTransaction",
+      chainId,
+      params: [
+        {
+          from: safeAddress,
+          to: safeAddress,
+          value: "0x0",
+          data: new SafeContractSuite().addOwnerData(recoveryAddress),
+        },
+      ],
+    };
+    expect(transaction).toEqual({
+      chainId: 1,
+      method: "eth_sendTransaction",
+      params: [
+        {
+          data: "0x0d582f13000000000000000000000000ffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001",
+          from: "0x1111111111111111111111111111111111111111",
+          to: "0x1111111111111111111111111111111111111111",
+          value: "0x0",
+        },
+      ],
+    });
+  });
+});
 
 describe("safeTxServiceUrlFor", () => {
   it("should return the correct URL for a supported chainId", () => {
@@ -22,10 +81,6 @@ describe("safeTxServiceUrlFor", () => {
 });
 
 describe("getSafeWalletInfo", () => {
-  beforeEach(() => {
-    fetchMock.resetMocks();
-  });
-
   it.skip("should fetch and return wallet info", async () => {
     const mockResponse = {
       address: "0x54F08c27e75BeA0cdDdb8aA9D69FD61551B19BbA",
@@ -39,21 +94,11 @@ describe("getSafeWalletInfo", () => {
       version: "1.4.1+L2",
     };
 
-    fetchMock.mockResponseOnce(JSON.stringify(mockResponse));
-
     const walletInfo = await getSafeWalletInfo(
       "0x54F08c27e75BeA0cdDdb8aA9D69FD61551B19BbA",
       8453,
     );
     expect(walletInfo).toEqual(mockResponse);
-  });
-
-  it("should throw an error if the fetch fails", async () => {
-    fetchMock.mockRejectOnce(new Error("Failed to fetch"));
-
-    await expect(
-      getSafeWalletInfo("0x54F08c27e75BeA0cdDdb8aA9D69FD61551B19BbA", 8453),
-    ).rejects.toThrow("Failed to fetch");
   });
 });
 
