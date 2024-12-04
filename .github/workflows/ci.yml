@@ -33,5 +33,5 @@ jobs:
           SAFE_SALT_NONCE: "0"
         run: |
           bun lint
-          bun run test
+          bun test
           bun build:next
