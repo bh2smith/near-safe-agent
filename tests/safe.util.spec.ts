@@ -8,7 +8,6 @@ import {
 import { SafeContractSuite } from "near-safe";
 
 describe("signRequestFor", () => {
-
   it("Add recovery Tx", () => {
     const chainId = 1;
     const safeAddress = "0x1111111111111111111111111111111111111111";
