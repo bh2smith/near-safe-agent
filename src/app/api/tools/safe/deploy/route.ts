@@ -1,15 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSafeSaltNonce, validateRequest } from "../../util";
-import { Address, zeroAddress } from "viem";
+import { validateRequest } from "../../util";
+import { Address } from "viem";
 import { isContract } from "near-safe";
 import { safeUrl } from "../util";
 import {
   addressField,
   FieldParser,
+  handleRequest,
+  NULL_TRANSACTION,
   numberField,
   signRequestFor,
+  TxData,
   validateInput,
-} from "@bitteprotocol/agent-sdk";
+} from "@bitte-ai/agent-sdk";
 
 interface Input {
   chainId: number;
@@ -21,47 +24,33 @@ const parsers: FieldParser<Input> = {
   safeAddress: addressField,
 };
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-  const headerError = await validateRequest(req, getSafeSaltNonce());
-  if (headerError) return headerError;
-
+async function logic(req: NextRequest): Promise<TxData> {
+  const headerError = await validateRequest(req);
+  if (headerError) throw headerError;
   const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
-  try {
-    const { chainId, safeAddress } = validateInput<Input>(search, parsers);
+  const { chainId, safeAddress } = validateInput<Input>(search, parsers);
 
-    const safeDeployed = await isContract(safeAddress, chainId);
-    if (safeDeployed) {
-      return NextResponse.json(
-        {
-          transaction: null,
-          meta: {
-            message:
-              "Safe Already Deployed. See here: " +
-              safeUrl(safeAddress, chainId),
-          },
-        },
-        { status: 200 },
-      );
-    }
-    const transaction = signRequestFor({
-      chainId,
-      metaTransactions: [
-        {
-          to: zeroAddress,
-          value: "0x00",
-          data: "0x",
-        },
-      ],
-    });
-    return NextResponse.json(
-      { transaction, meta: { safeUrl: safeUrl(safeAddress, chainId) } },
-      { status: 200 },
-    );
-  } catch (e: unknown) {
-    const message = JSON.stringify(e);
-    console.error(message);
-    return NextResponse.json({ error: message }, { status: 400 });
+  const safeDeployed = await isContract(safeAddress, chainId);
+  if (safeDeployed) {
+    return {
+      meta: {
+        message: `Safe Already Deployed: ${safeUrl(safeAddress, chainId)}`,
+      },
+    };
   }
+  return {
+    transaction: signRequestFor({
+      chainId,
+      metaTransactions: [NULL_TRANSACTION],
+    }),
+    meta: { safeUrl: safeUrl(safeAddress, chainId) },
+  };
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  return handleRequest(req, logic, (result) =>
+    NextResponse.json(result, { status: 200 }),
+  );
 }
