@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSafeSaltNonce, validateRequest } from "../../util";
+import { validateRequest } from "../../util";
 import { Address } from "viem";
 import { eip3770Address, getSafeWalletInfo } from "../util";
 import { isContract } from "near-safe/dist/esm/util";
@@ -7,10 +7,12 @@ import { SafeContractSuite } from "near-safe";
 import {
   addressField,
   FieldParser,
+  handleRequest,
   numberField,
   signRequestFor,
   validateInput,
-} from "@bitteprotocol/agent-sdk";
+  TxData,
+} from "@bitte-ai/agent-sdk";
 
 interface Input {
   chainId: number;
@@ -24,38 +26,32 @@ const parsers: FieldParser<Input> = {
   recoveryAddress: addressField,
 };
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-  const headerError = await validateRequest(req, getSafeSaltNonce());
-  if (headerError) return headerError;
+async function logic(req: NextRequest): Promise<TxData> {
+  const headerError = await validateRequest(req);
+  if (headerError) throw headerError;
 
   const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
-  try {
-    const { chainId, recoveryAddress, safeAddress } = validateInput<Input>(
-      search,
-      parsers,
-    );
+  const { chainId, recoveryAddress, safeAddress } = validateInput<Input>(
+    search,
+    parsers,
+  );
 
-    const ownersView = `https://app.safe.global/settings/setup?safe=${eip3770Address(safeAddress, chainId)}`;
-    const safeDeployed = await isContract(safeAddress, chainId);
-    if (safeDeployed) {
-      const safeInfo = await getSafeWalletInfo(safeAddress, chainId);
-      if (safeInfo && safeInfo.owners.includes(recoveryAddress)) {
-        return NextResponse.json(
-          {
-            transaction: null,
-            meta: {
-              message: `Recovery address ${recoveryAddress} already an owner of this Safe! View here: ${ownersView}`,
-            },
-            error: "Recovery address already in Safe",
-          },
-          { status: 200 },
-        );
-      }
+  const ownersView = `https://app.safe.global/settings/setup?safe=${eip3770Address(safeAddress, chainId)}`;
+  const safeDeployed = await isContract(safeAddress, chainId);
+  if (safeDeployed) {
+    const safeInfo = await getSafeWalletInfo(safeAddress, chainId);
+    if (safeInfo && safeInfo.owners.includes(recoveryAddress)) {
+      return {
+        meta: {
+          message: `Recovery address ${recoveryAddress} already an owner of this Safe! View here: ${ownersView}`,
+        },
+      };
     }
-
-    const transaction = signRequestFor({
+  }
+  return {
+    transaction: signRequestFor({
       chainId,
       metaTransactions: [
         {
@@ -64,14 +60,13 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           data: new SafeContractSuite().addOwnerData(recoveryAddress),
         },
       ],
-    });
-    return NextResponse.json(
-      { transaction, meta: { safeUrl: ownersView } },
-      { status: 200 },
-    );
-  } catch (e: unknown) {
-    const message = JSON.stringify(e);
-    console.error(message);
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
+    }),
+    meta: { safeUrl: ownersView },
+  };
+}
+
+export async function GET(req: NextRequest): Promise<NextResponse> {
+  return handleRequest(req, logic, (result) =>
+    NextResponse.json(result, { status: 200 }),
+  );
 }

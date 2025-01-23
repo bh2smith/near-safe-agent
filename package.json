@@ -12,7 +12,7 @@
     "test": "jest --config jest.config.ts"
   },
   "dependencies": {
-    "@bitteprotocol/agent-sdk": "^0.0.8",
+    "@bitte-ai/agent-sdk": "^0.1.5",
     "@safe-global/safe-core-sdk-utils": "^1.7.4",
     "near-safe": "^0.9.4",
     "next": "15.0.1",
