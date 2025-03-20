@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"next dev --turbopack\" \"make-agent dev\"",
     "dev-testnet": "concurrently \"next dev --turbopack\" \"make-agent dev -t\"",
-    "build:next": "next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint && prettier --check '{src/app,tests}/**/*.{js,jsx,ts,tsx}'",
     "fmt": "next lint --fix && prettier --write '{src/app,tests}/**/*.{js,jsx,ts,tsx}'",
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.10",
+    "@types/react": "19.0.12",
     "concurrently": "^9.1.2",
     "dotenv": "^16.4.7",
     "eslint-config-next": "15.2.3",
