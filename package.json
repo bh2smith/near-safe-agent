@@ -6,6 +6,7 @@
     "dev": "concurrently \"next dev --turbopack\" \"make-agent dev\"",
     "dev-testnet": "concurrently \"next dev --turbopack\" \"make-agent dev -t\"",
     "build": "next build",
+    "deploy": "make-agent deploy -u https://near-safe-agent.vercel.app/",
     "start": "next start",
     "lint": "next lint && prettier --check '{src/app,tests}/**/*.{js,jsx,ts,tsx}'",
     "fmt": "next lint --fix && prettier --write '{src/app,tests}/**/*.{js,jsx,ts,tsx}'",
