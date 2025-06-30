@@ -19,7 +19,7 @@ export async function GET() {
     },
     servers: [{ url: PLUGIN_URL }],
     "x-mb": {
-      "account-id": ACCOUNT_ID,
+      "account-id": ACCOUNT_ID || "max-normal.near",
       assistant: {
         name: "Safe Account Assistant",
         description: "An assistant for managing Near{Safe} Account Structure",
