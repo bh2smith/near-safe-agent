@@ -11,8 +11,8 @@ import {
   numberField,
   signRequestFor,
   validateInput,
-  TxData,
 } from "@bitte-ai/agent-sdk";
+import type { SignRequest } from "@bitte-ai/types";
 
 interface Input {
   chainId: number;
@@ -26,7 +26,9 @@ const parsers: FieldParser<Input> = {
   recoveryAddress: addressField,
 };
 
-async function logic(req: NextRequest): Promise<TxData> {
+async function logic(
+  req: NextRequest,
+): Promise<{ transaction?: SignRequest; meta: Record<string, string> }> {
   const headerError = await validateRequest(req);
   if (headerError) throw headerError;
 
@@ -56,7 +58,7 @@ async function logic(req: NextRequest): Promise<TxData> {
       metaTransactions: [
         {
           to: safeAddress,
-          value: "0",
+          value: "0x00",
           data: new SafeContractSuite().addOwnerData(recoveryAddress),
         },
       ],

@@ -7,12 +7,17 @@ import {
   addressField,
   FieldParser,
   handleRequest,
-  NULL_TRANSACTION,
   numberField,
   signRequestFor,
-  TxData,
   validateInput,
 } from "@bitte-ai/agent-sdk";
+import type { MetaTransaction, SignRequest } from "@bitte-ai/types";
+
+const NullTransaction: MetaTransaction = {
+  to: "0x0000000000000000000000000000000000000000",
+  value: "0x00",
+  data: "0x",
+};
 
 interface Input {
   chainId: number;
@@ -24,7 +29,9 @@ const parsers: FieldParser<Input> = {
   safeAddress: addressField,
 };
 
-async function logic(req: NextRequest): Promise<TxData> {
+async function logic(
+  req: NextRequest,
+): Promise<{ transaction?: SignRequest; meta: Record<string, string> }> {
   const headerError = await validateRequest(req);
   if (headerError) throw headerError;
   const search = req.nextUrl.searchParams;
@@ -43,7 +50,7 @@ async function logic(req: NextRequest): Promise<TxData> {
   return {
     transaction: signRequestFor({
       chainId,
-      metaTransactions: [NULL_TRANSACTION],
+      metaTransactions: [NullTransaction],
     }),
     meta: { safeUrl: safeUrl(safeAddress, chainId) },
   };
