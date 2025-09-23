@@ -1,15 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { Address } from "viem";
 import { isContract } from "near-safe";
 import { safeUrl } from "../util";
 import {
   addressField,
   FieldParser,
-  handleRequest,
   numberField,
   validateInput,
 } from "@bitte-ai/agent-sdk";
 import type { MetaTransaction, SignRequest } from "@bitte-ai/agent-sdk/evm";
+import { Router, Request, Response } from "express";
 
 const NullTransaction: MetaTransaction = {
   to: "0x0000000000000000000000000000000000000000",
@@ -28,9 +27,8 @@ const parsers: FieldParser<Input> = {
 };
 
 async function logic(
-  req: NextRequest,
+  search: URLSearchParams,
 ): Promise<{ transaction?: SignRequest; meta: Record<string, string> }> {
-  const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
   const { chainId, safeAddress } = validateInput<Input>(search, parsers);
@@ -53,8 +51,11 @@ async function logic(
   };
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-  return handleRequest(req, logic, (result) =>
-    NextResponse.json(result, { status: 200 }),
-  );
-}
+const deployRouter = Router();
+
+deployRouter.get("/", async (req: Request, res: Response) => {
+  const result = await logic(new URLSearchParams(req.url));
+  res.status(200).json(result);
+});
+
+export default deployRouter;

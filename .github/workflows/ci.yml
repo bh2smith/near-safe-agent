@@ -29,8 +29,6 @@ jobs:
           bun install
 
       - name: Lint, Test & Build
-        env:
-          SAFE_SALT_NONCE: "0"
         run: |
           bun lint
           bun test
