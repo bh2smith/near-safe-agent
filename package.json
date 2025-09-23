@@ -3,38 +3,33 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"next dev --turbopack\" \"make-agent dev\"",
-    "dev-testnet": "concurrently \"next dev --turbopack\" \"make-agent dev -t\"",
-    "build": "next build",
+    "agent": "concurrently \"tsx src/index.ts\" \"make-agent dev\"",
+    "api": "tsx src/index.ts",
+    "build": "tsc",
     "deploy": "make-agent deploy -u https://near-safe-agent.vercel.app/",
-    "start": "next start",
-    "lint": "eslint {src,tests} && prettier --check '{src/app,tests}/**/*.{js,jsx,ts,tsx}'",
-    "fmt": "eslint --fix {src,tests} && prettier --write '{src/app,tests}/**/*.{js,jsx,ts,tsx}'"
+    "lint": "eslint {src,tests}/**/*.ts && prettier --check '{src,tests}/**/*.{js,jsx,ts,tsx}'",
+    "fmt": "eslint --fix {src,tests}/**/*.ts && prettier --write '{src,tests}/**/*.{js,jsx,ts,tsx}'"
   },
   "dependencies": {
     "@bitte-ai/agent-sdk": "^0.4.1",
     "@safe-global/safe-core-sdk-utils": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "near-safe": "0.12.0",
-    "next": "^15.5.3",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "redoc": "^2.5.0",
-    "vercel-url": "^0.2.8",
     "viem": "^2.37.8"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.36.0",
+    "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.5.2",
-    "@types/react": "^19.1.13",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
     "concurrently": "^9.2.1",
     "dotenv": "^17.2.2",
     "eslint": "^9.36.0",
-    "eslint-config-next": "^15.5.3",
     "make-agent": "^0.4.1",
     "prettier": "^3.6.2",
-    "ts-jest": "^29.4.4",
     "typescript": "^5.9.2"
   }
 }

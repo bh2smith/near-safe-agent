@@ -1,11 +1,10 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { Router, Request, Response } from "express";
 import { Address } from "viem";
 import { eip3770Address, getSafeWalletInfo } from "../util";
 import { isContract, SafeContractSuite } from "near-safe";
 import {
   addressField,
   FieldParser,
-  handleRequest,
   numberField,
   validateInput,
 } from "@bitte-ai/agent-sdk";
@@ -24,9 +23,8 @@ const parsers: FieldParser<Input> = {
 };
 
 async function logic(
-  req: NextRequest,
+  search: URLSearchParams,
 ): Promise<{ transaction?: SignRequest; meta: Record<string, string> }> {
-  const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
   const { chainId, recoveryAddress, safeAddress } = validateInput<Input>(
@@ -62,8 +60,11 @@ async function logic(
   };
 }
 
-export async function GET(req: NextRequest): Promise<NextResponse> {
-  return handleRequest(req, logic, (result) =>
-    NextResponse.json(result, { status: 200 }),
-  );
-}
+const recoveryRouter = Router();
+
+recoveryRouter.get("/", async (req: Request, res: Response) => {
+  const result = await logic(new URLSearchParams(req.url));
+  res.status(200).json(result);
+});
+
+export default recoveryRouter;
