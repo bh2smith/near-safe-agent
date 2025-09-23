@@ -1,18 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { validateRequest } from "../../util";
 import { Address } from "viem";
 import { eip3770Address, getSafeWalletInfo } from "../util";
-import { isContract } from "near-safe/dist/esm/util";
-import { SafeContractSuite } from "near-safe";
+import { isContract, SafeContractSuite } from "near-safe";
 import {
   addressField,
   FieldParser,
   handleRequest,
   numberField,
-  signRequestFor,
   validateInput,
 } from "@bitte-ai/agent-sdk";
-import type { SignRequest } from "@bitte-ai/types";
+import { SignRequest } from "@bitte-ai/agent-sdk/evm";
 
 interface Input {
   chainId: number;
@@ -29,9 +26,6 @@ const parsers: FieldParser<Input> = {
 async function logic(
   req: NextRequest,
 ): Promise<{ transaction?: SignRequest; meta: Record<string, string> }> {
-  const headerError = await validateRequest(req);
-  if (headerError) throw headerError;
-
   const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
@@ -53,16 +47,17 @@ async function logic(
     }
   }
   return {
-    transaction: signRequestFor({
+    transaction: {
+      method: "eth_sendTransaction",
       chainId,
-      metaTransactions: [
+      params: [
         {
           to: safeAddress,
           value: "0x00",
           data: new SafeContractSuite().addOwnerData(recoveryAddress),
         },
       ],
-    }),
+    },
     meta: { safeUrl: ownersView },
   };
 }
