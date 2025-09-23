@@ -1,5 +1,4 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { validateRequest } from "../../util";
 import { Address } from "viem";
 import { isContract } from "near-safe";
 import { safeUrl } from "../util";
@@ -8,7 +7,6 @@ import {
   FieldParser,
   handleRequest,
   numberField,
-  signRequestFor,
   validateInput,
 } from "@bitte-ai/agent-sdk";
 import type { MetaTransaction, SignRequest } from "@bitte-ai/types";
@@ -32,8 +30,6 @@ const parsers: FieldParser<Input> = {
 async function logic(
   req: NextRequest,
 ): Promise<{ transaction?: SignRequest; meta: Record<string, string> }> {
-  const headerError = await validateRequest(req);
-  if (headerError) throw headerError;
   const search = req.nextUrl.searchParams;
   console.log("safe/deploy/", search);
 
@@ -48,10 +44,11 @@ async function logic(
     };
   }
   return {
-    transaction: signRequestFor({
+    transaction: {
+      method: "eth_sendTransaction",
       chainId,
-      metaTransactions: [NullTransaction],
-    }),
+      params: [NullTransaction],
+    },
     meta: { safeUrl: safeUrl(safeAddress, chainId) },
   };
 }
