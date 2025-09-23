@@ -9,7 +9,7 @@ import {
   numberField,
   validateInput,
 } from "@bitte-ai/agent-sdk";
-import type { SignRequest } from "@bitte-ai/types";
+import { SignRequest } from "@bitte-ai/agent-sdk/evm";
 
 interface Input {
   chainId: number;

@@ -9,7 +9,7 @@ import {
   numberField,
   validateInput,
 } from "@bitte-ai/agent-sdk";
-import type { MetaTransaction, SignRequest } from "@bitte-ai/types";
+import type { MetaTransaction, SignRequest } from "@bitte-ai/agent-sdk/evm";
 
 const NullTransaction: MetaTransaction = {
   to: "0x0000000000000000000000000000000000000000",
