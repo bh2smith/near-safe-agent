@@ -4,7 +4,7 @@ import {
   getSafeWalletInfo,
   eip3770Address,
   safeUrl,
-} from "../src/app/api/tools/safe/util";
+} from "../src/api/util";
 import { SafeContractSuite } from "near-safe";
 
 describe("signRequestFor", () => {
